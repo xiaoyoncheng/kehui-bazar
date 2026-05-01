@@ -1,0 +1,1037 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>kehui bazar 管理后台</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #263238;
+      --muted: #667472;
+      --line: #dfe8e4;
+      --paper: #fffaf3;
+      --surface: #ffffff;
+      --soft: #f3f8f5;
+      --brand: #26735a;
+      --brand-dark: #164d3d;
+      --accent: #d86b42;
+      --accent-soft: #fff0e8;
+      --danger: #b63d32;
+      --shadow: 0 18px 45px rgba(30, 55, 45, 0.1);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: linear-gradient(180deg, var(--paper), #f8fbf8 45%, #ffffff);
+      line-height: 1.5;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .shell {
+      width: min(1240px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 250, 243, 0.94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+
+    .top {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--brand-dark);
+      font-weight: 900;
+      font-size: 1.18rem;
+    }
+
+    .mark {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--brand);
+      color: white;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 13px;
+      border-radius: 8px;
+      background: var(--brand);
+      color: white;
+      font-weight: 850;
+      box-shadow: 0 12px 24px rgba(38, 115, 90, 0.17);
+    }
+
+    .btn.secondary {
+      background: white;
+      color: var(--brand-dark);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .btn.warn {
+      background: var(--accent);
+    }
+
+    .btn.danger {
+      background: var(--danger);
+    }
+
+    .btn.tiny {
+      min-height: 32px;
+      padding: 0 10px;
+      font-size: 0.88rem;
+      box-shadow: none;
+    }
+
+    main {
+      padding: 34px 0 54px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 22px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      color: var(--brand-dark);
+      font-size: clamp(2rem, 4vw, 3.6rem);
+    }
+
+    .hero p {
+      max-width: 720px;
+      color: var(--muted);
+      margin: 12px 0 0;
+      font-size: 1.04rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 22px 0;
+    }
+
+    .stat, .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 12px 28px rgba(32, 55, 45, 0.06);
+    }
+
+    .notice {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: start;
+      margin: 18px 0 22px;
+      padding: 16px;
+      border: 1px solid #f0c7ad;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      color: #78351f;
+    }
+
+    .notice strong {
+      display: block;
+      color: #642c1b;
+      margin-bottom: 4px;
+    }
+
+    .notice-icon {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: white;
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    .stat {
+      padding: 16px;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 5px;
+      color: var(--brand-dark);
+      font-size: 1.65rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(340px, 0.8fr) minmax(0, 1.2fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 17px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfdfb;
+    }
+
+    .panel-head h2 {
+      color: var(--brand-dark);
+      font-size: 1.25rem;
+    }
+
+    .panel-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .panel-body {
+      padding: 18px;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--brand-dark);
+      font-size: 0.9rem;
+      font-weight: 780;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 11px;
+      background: white;
+      color: var(--ink);
+      outline: 0;
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(38, 115, 90, 0.13);
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdfb;
+    }
+
+    .switch-row label {
+      display: inline-flex;
+      grid-template-columns: none;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-weight: 750;
+    }
+
+    .switch-row input {
+      width: auto;
+      min-height: auto;
+      accent-color: var(--brand);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+      grid-column: 1 / -1;
+      padding-top: 4px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .search {
+      min-width: min(360px, 100%);
+    }
+
+    .product-list, .order-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .product-row, .order-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 13px;
+    }
+
+    .product-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .emoji {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      font-size: 1.6rem;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .price {
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    .badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 7px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 25px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--brand-dark);
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .badge.off {
+      background: #f4eeee;
+      color: var(--danger);
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 7px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .order-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .order-title {
+      display: grid;
+      gap: 4px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      width: max-content;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #9b4427;
+      font-weight: 900;
+      font-size: 0.84rem;
+    }
+
+    .order-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .order-box {
+      padding: 10px;
+      border-radius: 8px;
+      background: #fbfdfb;
+      color: var(--muted);
+    }
+
+    .order-box strong {
+      color: var(--ink);
+    }
+
+    .items {
+      display: grid;
+      gap: 7px;
+      margin: 10px 0;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+    }
+
+    .item strong {
+      color: var(--ink);
+    }
+
+    .status-actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .empty {
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      background: var(--soft);
+      border-radius: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 30;
+      max-width: min(360px, calc(100vw - 36px));
+      padding: 13px 16px;
+      border-radius: 8px;
+      background: var(--brand-dark);
+      color: white;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: 0.22s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 980px) {
+      .hero, .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        width: min(100% - 22px, 1240px);
+      }
+
+      .top {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 14px 0;
+      }
+
+      .stats, form, .order-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .product-row {
+        grid-template-columns: auto 1fr;
+      }
+
+      .row-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell top">
+      <a class="brand" href="index.html">
+        <span class="mark">KB</span>
+        <span>kehui bazar 管理后台</span>
+      </a>
+      <div class="top-actions">
+        <a class="btn secondary" href="index.html">打开前台</a>
+        <button class="btn secondary" id="exportData" type="button">导出数据</button>
+        <button class="btn warn" id="sampleOrder" type="button">生成模拟订单</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <h1>商品与订单管理</h1>
+        <p>这里是给店主使用的简单后台。商品和订单会保存在当前浏览器本地，适合演示、内部测试和整理第一版商品资料。</p>
+      </div>
+      <button class="btn danger" id="clearOrders" type="button">清空订单</button>
+    </section>
+
+    <section class="notice" aria-label="本地服务说明">
+      <div class="notice-icon">!</div>
+      <div>
+        <strong>运营规则：目前只做本地服务</strong>
+        普通配送只面向店铺附近区域。周边小镇订单不能默认直接配送，必须先联系客户确认：最低订单金额、可配送日期、预计时间、是否加配送费。确认后再把订单状态改为“已确认”或“备货中”。
+      </div>
+    </section>
+
+    <section class="stats" aria-label="数据概览">
+      <div class="stat"><span>商品数量</span><strong id="statProducts">0</strong></div>
+      <div class="stat"><span>上架商品</span><strong id="statActive">0</strong></div>
+      <div class="stat"><span>订单数量</span><strong id="statOrders">0</strong></div>
+      <div class="stat"><span>待处理订单</span><strong id="statPending">0</strong></div>
+    </section>
+
+    <section class="layout">
+      <article class="panel">
+        <div class="panel-head">
+          <h2 id="formTitle">添加商品</h2>
+          <p>填写中文、西班牙语和英文内容，前台语言切换时会自动显示对应文案。</p>
+        </div>
+        <div class="panel-body">
+          <form id="productForm">
+            <input type="hidden" id="productId">
+            <label>
+              图标或表情
+              <input id="icon" maxlength="3" placeholder="例如 🔋" required>
+            </label>
+            <label>
+              价格 €
+              <input id="price" type="number" min="0" step="0.01" required>
+            </label>
+            <label>
+              原价 €
+              <input id="originalPrice" type="number" min="0" step="0.01" required>
+            </label>
+            <label>
+              库存
+              <input id="stock" type="number" min="0" step="1" required>
+            </label>
+            <label>
+              中文名
+              <input id="nameZh" required>
+            </label>
+            <label>
+              西班牙语名
+              <input id="nameEs" required>
+            </label>
+            <label>
+              英文名
+              <input id="nameEn" required>
+            </label>
+            <label>
+              中文分类
+              <input id="categoryZh" required>
+            </label>
+            <label>
+              西语分类
+              <input id="categoryEs" required>
+            </label>
+            <label>
+              英文分类
+              <input id="categoryEn" required>
+            </label>
+            <label class="full">
+              中文描述
+              <textarea id="descZh" required></textarea>
+            </label>
+            <label class="full">
+              西语描述
+              <textarea id="descEs" required></textarea>
+            </label>
+            <label class="full">
+              英文描述
+              <textarea id="descEn" required></textarea>
+            </label>
+            <div class="switch-row full">
+              <label><input id="delivery" type="checkbox" checked> 支持本地配送</label>
+              <label><input id="pickup" type="checkbox" checked> 支持店内自提</label>
+              <label><input id="active" type="checkbox" checked> 前台上架</label>
+            </div>
+            <div class="form-actions">
+              <button class="btn" type="submit">保存商品</button>
+              <button class="btn secondary" id="resetForm" type="button">新建商品</button>
+            </div>
+          </form>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <h2>商品列表</h2>
+          <p>编辑价格、库存、分类和上下架状态。前台刷新后会读取这里保存的商品。</p>
+        </div>
+        <div class="panel-body">
+          <div class="toolbar">
+            <input class="search" id="productSearch" type="search" placeholder="搜索商品名称、分类或描述">
+            <button class="btn secondary" id="resetProducts" type="button">恢复默认商品</button>
+          </div>
+          <div class="product-list" id="productList"></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel" style="margin-top:18px;">
+      <div class="panel-head">
+        <h2>订单列表</h2>
+        <p>客户在前台结算后，订单会出现在这里。周边小镇订单请先确认配送条件，再点击状态按钮处理。</p>
+      </div>
+      <div class="panel-body">
+        <div class="toolbar">
+          <input class="search" id="orderSearch" type="search" placeholder="搜索订单号、客户、电话、区域">
+          <select id="statusFilter" class="search">
+            <option value="all">全部状态</option>
+            <option value="new">新订单</option>
+            <option value="confirmed">已确认</option>
+            <option value="preparing">备货中</option>
+            <option value="pickupReady">可自提</option>
+            <option value="delivering">配送中</option>
+            <option value="done">已完成</option>
+            <option value="cancelled">已取消</option>
+          </select>
+        </div>
+        <div class="order-list" id="orderList"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const storageProducts = 'kehuiProducts';
+    const storageOrders = 'kehuiOrders';
+
+    const defaultProducts = [
+      { id: 'battery', icon: '🔋', price: 2, originalPrice: 2, stock: 12, category: { es: 'Electrónica', zh: '电子产品', en: 'Electronic products' }, name: { es: 'Pila', zh: '电池', en: 'Battery' }, desc: { es: 'Pilas desechables de alta capacidad.', zh: '高容量一次性电池。', en: 'High-capacity disposable batteries.' }, delivery: true, pickup: true, active: true },
+      { id: 'cleaner', icon: '🧴', price: 3.5, originalPrice: 4.2, stock: 28, category: { es: 'Limpieza', zh: '清洁用品', en: 'Cleaning supplies' }, name: { es: 'Limpiador multiusos', zh: '多功能清洁剂', en: 'Multi-purpose cleaner' }, desc: { es: 'Para cocina, baño y superficies del hogar.', zh: '适合厨房、浴室和家中表面。', en: 'For kitchen, bathroom and home surfaces.' }, delivery: true, pickup: true, active: true },
+      { id: 'paper', icon: '🧻', price: 4.8, originalPrice: 5.5, stock: 18, category: { es: 'Papel', zh: '纸品', en: 'Paper goods' }, name: { es: 'Papel de cocina', zh: '厨房纸', en: 'Kitchen paper' }, desc: { es: 'Pack práctico para limpieza diaria.', zh: '日常清洁实用装。', en: 'Practical pack for daily cleaning.' }, delivery: true, pickup: true, active: true },
+      { id: 'box', icon: '📦', price: 6.9, originalPrice: 7.9, stock: 9, category: { es: 'Organización', zh: '收纳用品', en: 'Storage' }, name: { es: 'Caja organizadora', zh: '收纳盒', en: 'Storage box' }, desc: { es: 'Ordena armarios, baño o escritorio.', zh: '适合衣柜、浴室或书桌收纳。', en: 'Organize closets, bathroom or desk.' }, delivery: true, pickup: true, active: true }
+    ];
+
+    const statusLabels = {
+      new: '新订单',
+      confirmed: '已确认',
+      preparing: '备货中',
+      pickupReady: '可自提',
+      delivering: '配送中',
+      done: '已完成',
+      cancelled: '已取消'
+    };
+
+    const nextStatuses = ['new', 'confirmed', 'preparing', 'pickupReady', 'delivering', 'done', 'cancelled'];
+
+    function readProducts() {
+      const products = JSON.parse(localStorage.getItem(storageProducts) || 'null');
+      if (Array.isArray(products) && products.length) return products;
+      localStorage.setItem(storageProducts, JSON.stringify(defaultProducts));
+      return [...defaultProducts];
+    }
+
+    function writeProducts(products) {
+      localStorage.setItem(storageProducts, JSON.stringify(products));
+    }
+
+    function readOrders() {
+      return JSON.parse(localStorage.getItem(storageOrders) || '[]');
+    }
+
+    function writeOrders(orders) {
+      localStorage.setItem(storageOrders, JSON.stringify(orders));
+    }
+
+    function euro(value) {
+      return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(value || 0));
+    }
+
+    function makeId(name) {
+      const base = (name || 'product').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return `${base || 'product'}-${Date.now()}`;
+    }
+
+    function toast(message) {
+      const el = document.getElementById('toast');
+      el.textContent = message;
+      el.classList.add('show');
+      window.clearTimeout(toast.timer);
+      toast.timer = window.setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    function formToProduct() {
+      const id = document.getElementById('productId').value || makeId(document.getElementById('nameEn').value);
+      return {
+        id,
+        icon: document.getElementById('icon').value.trim() || '📦',
+        price: Number(document.getElementById('price').value || 0),
+        originalPrice: Number(document.getElementById('originalPrice').value || 0),
+        stock: Number(document.getElementById('stock').value || 0),
+        category: {
+          zh: document.getElementById('categoryZh').value.trim(),
+          es: document.getElementById('categoryEs').value.trim(),
+          en: document.getElementById('categoryEn').value.trim()
+        },
+        name: {
+          zh: document.getElementById('nameZh').value.trim(),
+          es: document.getElementById('nameEs').value.trim(),
+          en: document.getElementById('nameEn').value.trim()
+        },
+        desc: {
+          zh: document.getElementById('descZh').value.trim(),
+          es: document.getElementById('descEs').value.trim(),
+          en: document.getElementById('descEn').value.trim()
+        },
+        delivery: document.getElementById('delivery').checked,
+        pickup: document.getElementById('pickup').checked,
+        active: document.getElementById('active').checked
+      };
+    }
+
+    function productToForm(product) {
+      document.getElementById('formTitle').textContent = '编辑商品';
+      document.getElementById('productId').value = product.id;
+      document.getElementById('icon').value = product.icon || '📦';
+      document.getElementById('price').value = product.price;
+      document.getElementById('originalPrice').value = product.originalPrice;
+      document.getElementById('stock').value = product.stock;
+      document.getElementById('nameZh').value = product.name.zh;
+      document.getElementById('nameEs').value = product.name.es;
+      document.getElementById('nameEn').value = product.name.en;
+      document.getElementById('categoryZh').value = product.category.zh;
+      document.getElementById('categoryEs').value = product.category.es;
+      document.getElementById('categoryEn').value = product.category.en;
+      document.getElementById('descZh').value = product.desc.zh;
+      document.getElementById('descEs').value = product.desc.es;
+      document.getElementById('descEn').value = product.desc.en;
+      document.getElementById('delivery').checked = product.delivery !== false;
+      document.getElementById('pickup').checked = product.pickup !== false;
+      document.getElementById('active').checked = product.active !== false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetForm() {
+      document.getElementById('formTitle').textContent = '添加商品';
+      document.getElementById('productForm').reset();
+      document.getElementById('productId').value = '';
+      document.getElementById('delivery').checked = true;
+      document.getElementById('pickup').checked = true;
+      document.getElementById('active').checked = true;
+    }
+
+    function renderProducts() {
+      const products = readProducts();
+      const query = document.getElementById('productSearch').value.trim().toLowerCase();
+      const list = document.getElementById('productList');
+      const filtered = products.filter((product) => [
+        product.name.zh, product.name.es, product.name.en,
+        product.category.zh, product.category.es, product.category.en,
+        product.desc.zh, product.desc.es, product.desc.en
+      ].join(' ').toLowerCase().includes(query));
+
+      list.innerHTML = filtered.length ? filtered.map((product) => `
+        <div class="product-row">
+          <div class="emoji">${product.icon || '📦'}</div>
+          <div>
+            <strong>${product.name.zh}</strong>
+            <div class="muted">${product.name.es} · ${product.name.en}</div>
+            <div class="badges">
+              <span class="badge">${product.category.zh}</span>
+              <span class="badge">${euro(product.price)}</span>
+              <span class="badge">库存 ${product.stock}</span>
+              <span class="badge ${product.active === false ? 'off' : ''}">${product.active === false ? '已下架' : '已上架'}</span>
+            </div>
+          </div>
+          <div class="row-actions">
+            <button class="btn tiny secondary" data-edit="${product.id}" type="button">编辑</button>
+            <button class="btn tiny warn" data-toggle="${product.id}" type="button">${product.active === false ? '上架' : '下架'}</button>
+            <button class="btn tiny danger" data-delete="${product.id}" type="button">删除</button>
+          </div>
+        </div>
+      `).join('') : '<div class="empty">没有找到商品。</div>';
+
+      list.querySelectorAll('[data-edit]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const product = readProducts().find((item) => item.id === button.dataset.edit);
+          if (product) productToForm(product);
+        });
+      });
+
+      list.querySelectorAll('[data-toggle]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const updated = readProducts().map((product) => product.id === button.dataset.toggle ? { ...product, active: product.active === false } : product);
+          writeProducts(updated);
+          renderAll();
+          toast('商品状态已更新。');
+        });
+      });
+
+      list.querySelectorAll('[data-delete]').forEach((button) => {
+        button.addEventListener('click', () => {
+          if (!confirm('确定删除这个商品吗？')) return;
+          writeProducts(readProducts().filter((product) => product.id !== button.dataset.delete));
+          renderAll();
+          toast('商品已删除。');
+        });
+      });
+    }
+
+    function renderOrders() {
+      const orders = readOrders();
+      const query = document.getElementById('orderSearch').value.trim().toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+      const list = document.getElementById('orderList');
+      const filtered = orders.filter((order) => {
+        const inStatus = status === 'all' || order.status === status;
+        const haystack = [
+          order.id,
+          order.customer?.name,
+          order.customer?.phone,
+          order.customer?.town,
+          order.customer?.notes,
+          order.method,
+          ...(order.items || []).map((item) => item.name?.zh || item.name?.es || item.name?.en)
+        ].join(' ').toLowerCase();
+        return inStatus && haystack.includes(query);
+      });
+
+      list.innerHTML = filtered.length ? filtered.map((order) => {
+        const created = new Date(order.createdAt).toLocaleString('zh-CN');
+        const method = order.method === 'pickup' ? '店内自提' : '本地配送';
+        return `
+          <article class="order-card">
+            <div class="order-head">
+              <div class="order-title">
+                <strong>${order.id}</strong>
+                <span class="muted">${created}</span>
+              </div>
+              <span class="status">${statusLabels[order.status] || order.status}</span>
+            </div>
+            <div class="order-grid">
+              <div class="order-box">
+                <strong>${order.customer?.name || '未填写姓名'}</strong><br>
+                电话：${order.customer?.phone || '未填写'}<br>
+                区域：${order.customer?.town || '未填写'}
+              </div>
+              <div class="order-box">
+                方式：<strong>${method}</strong><br>
+                小计：${euro(order.totals?.subtotal)}<br>
+                配送：${Number(order.totals?.shipping || 0) === 0 ? '免费' : euro(order.totals.shipping)}<br>
+                合计：<strong>${euro(order.totals?.total)}</strong>
+              </div>
+            </div>
+            <div class="items">
+              ${(order.items || []).map((item) => `
+                <div class="item">
+                  <span>${item.icon || '📦'} <strong>${item.name?.zh || item.name?.es || item.name?.en}</strong> x ${item.qty}</span>
+                  <span>${euro(item.price * item.qty)}</span>
+                </div>
+              `).join('')}
+            </div>
+            <div class="muted">备注：${order.customer?.notes || '无'}</div>
+            <div class="status-actions">
+              ${nextStatuses.map((key) => `<button class="btn tiny ${order.status === key ? 'warn' : 'secondary'}" data-order="${order.id}" data-status="${key}" type="button">${statusLabels[key]}</button>`).join('')}
+              <button class="btn tiny danger" data-remove-order="${order.id}" type="button">删除订单</button>
+            </div>
+          </article>
+        `;
+      }).join('') : '<div class="empty">还没有订单。可以先去前台下单，或点击右上角生成模拟订单。</div>';
+
+      list.querySelectorAll('[data-order][data-status]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const updated = readOrders().map((order) => order.id === button.dataset.order ? { ...order, status: button.dataset.status } : order);
+          writeOrders(updated);
+          renderAll();
+          toast('订单状态已更新。');
+        });
+      });
+
+      list.querySelectorAll('[data-remove-order]').forEach((button) => {
+        button.addEventListener('click', () => {
+          if (!confirm('确定删除这个订单吗？')) return;
+          writeOrders(readOrders().filter((order) => order.id !== button.dataset.removeOrder));
+          renderAll();
+          toast('订单已删除。');
+        });
+      });
+    }
+
+    function renderStats() {
+      const products = readProducts();
+      const orders = readOrders();
+      document.getElementById('statProducts').textContent = products.length;
+      document.getElementById('statActive').textContent = products.filter((product) => product.active !== false).length;
+      document.getElementById('statOrders').textContent = orders.length;
+      document.getElementById('statPending').textContent = orders.filter((order) => !['done', 'cancelled'].includes(order.status)).length;
+    }
+
+    function renderAll() {
+      renderStats();
+      renderProducts();
+      renderOrders();
+    }
+
+    function addSampleOrder() {
+      const product = readProducts()[0] || defaultProducts[0];
+      const subtotal = product.price * 2;
+      const shipping = subtotal >= 30 ? 0 : 3.5;
+      const order = {
+        id: `KB-${Date.now()}`,
+        createdAt: new Date().toISOString(),
+        status: 'new',
+        customer: {
+          name: '模拟客户',
+          phone: '+34 600 000 000',
+          town: '周边小镇',
+          notes: '需要先确认是否可送、最低金额、配送时间和额外费用。'
+        },
+        method: 'delivery',
+        items: [{ id: product.id, icon: product.icon, name: product.name, category: product.category, price: product.price, qty: 2 }],
+        totals: { subtotal, shipping, total: subtotal + shipping }
+      };
+      writeOrders([order, ...readOrders()]);
+      renderAll();
+      toast('已生成一个模拟订单。');
+    }
+
+    document.getElementById('productForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const product = formToProduct();
+      const products = readProducts();
+      const existing = products.findIndex((item) => item.id === product.id);
+      if (existing >= 0) products[existing] = product;
+      else products.unshift(product);
+      writeProducts(products);
+      resetForm();
+      renderAll();
+      toast('商品已保存，前台刷新后可看到。');
+    });
+
+    document.getElementById('resetForm').addEventListener('click', resetForm);
+    document.getElementById('productSearch').addEventListener('input', renderProducts);
+    document.getElementById('orderSearch').addEventListener('input', renderOrders);
+    document.getElementById('statusFilter').addEventListener('change', renderOrders);
+    document.getElementById('sampleOrder').addEventListener('click', addSampleOrder);
+    document.getElementById('resetProducts').addEventListener('click', () => {
+      if (!confirm('确定恢复默认商品吗？当前商品列表会被覆盖。')) return;
+      writeProducts(defaultProducts);
+      renderAll();
+      toast('默认商品已恢复。');
+    });
+    document.getElementById('clearOrders').addEventListener('click', () => {
+      if (!confirm('确定清空全部订单吗？')) return;
+      writeOrders([]);
+      renderAll();
+      toast('订单已清空。');
+    });
+    document.getElementById('exportData').addEventListener('click', async () => {
+      const data = JSON.stringify({ products: readProducts(), orders: readOrders() }, null, 2);
+      try {
+        await navigator.clipboard.writeText(data);
+        toast('商品和订单数据已复制。');
+      } catch {
+        console.log(data);
+        toast('浏览器不允许复制，数据已输出到控制台。');
+      }
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>
