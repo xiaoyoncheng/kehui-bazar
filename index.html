@@ -4519,6 +4519,7 @@
       };
       if (product?.unit) normalized.unit = localized(product.unit, '');
       if (product?.priceLabel) normalized.priceLabel = localized(product.priceLabel, `€${normalized.price.toFixed(2)}`);
+      delete normalized.purchasePrice;
       return normalized;
     }
 

@@ -704,10 +704,7 @@
               商品代码 / 条码
               <input id="code" placeholder="例如 8421917122210">
             </label>
-            <label>
-              进货价 €
-              <input id="purchasePrice" type="number" min="0" step="0.01" placeholder="发票进货价">
-            </label>
+            <input id="purchasePrice" type="hidden" value="">
             <label>
               价格 €
               <input id="price" type="number" min="0" step="0.01" required>
@@ -3421,45 +3418,7 @@
 
     const catalogProducts = [...defaultProducts, ...invoiceDraftProducts, ...invoice20260520Products, ...invoice25262505Products];
 
-    const invoicePurchasePrices = {
-      'invoice-8421917122210': 1.99,
-      'invoice-8603386005212': 0.45,
-      'invoice-8436539065319': 1.00,
-      'invoice-8435476204430': 1.69,
-      'invoice-8435419465232': 3.58,
-      'invoice-8414926605539': 0.89,
-      'invoice-8423659005141': 1.15,
-      'invoice-8603386005243': 0.69,
-      'invoice-8413805256145': 0.75,
-      'invoice-8414926307747': 8.93,
-      'invoice-8414926457251': 14.05,
-      'invoice-8435476204355': 1.45,
-      'invoice-8414227065759': 1.55,
-      'invoice-8435288800059': 0.37,
-      'invoice-8603386005762': 0.50,
-      'invoice-8423659005165': 1.30,
-      'invoice-8414926112877': 2.99,
-      'invoice-8414926615477': 0.60,
-      'invoice-8435476204379': 1.90,
-      'invoice-8608683071380': 0.43,
-      'invoice-8413805256183': 0.31,
-      'invoice-8413805256084': 0.67,
-      'invoice-8692952075285': 6.70,
-      'invoice-8608683048092': 0.55,
-      'invoice-8435476204393': 2.49,
-      'invoice-6662023703203': 8.19,
-      'invoice-8422102644715': 1.02,
-      'invoice-8435476251816': 7.76,
-      'invoice-8430707017537': 3.58,
-      'invoice-8435507224864': 0.54,
-      'invoice-8436539082873': 1.44,
-      'invoice-6662021501078': 3.84,
-      'invoice-8435476205383': 3.02,
-      'invoice-8431311050200': 0.53,
-      'invoice-8209709122668': 1.57,
-      'invoice-8414926253273': 4.99,
-      'invoice-8209709122675': 2.23
-    };
+    const invoicePurchasePrices = {};
 
     const genericDraftDescription = {
       zh: '从发票导入的草稿商品，零售价待定。',
@@ -3554,7 +3513,11 @@
       }
       const normalized = products.map((product) => {
         const defaultProduct = findCatalogProduct(product);
-        if (!defaultProduct) return product;
+        if (!defaultProduct) {
+          const cleaned = { ...product };
+          delete cleaned.purchasePrice;
+          return cleaned;
+        }
         const refreshedProduct = refreshInvoice25262505Draft(product, defaultProduct);
         const merged = {
           ...defaultProduct,
@@ -3614,8 +3577,7 @@
     }
 
     function productPurchasePrice(product) {
-      if (product.purchasePrice !== undefined && product.purchasePrice !== '') return Number(product.purchasePrice);
-      return invoicePurchasePrices[product.id] ?? '';
+      return '';
     }
 
     function toast(message) {
@@ -3633,7 +3595,6 @@
         code: document.getElementById('code').value.trim(),
         icon: document.getElementById('icon').value.trim() || '📦',
         image: document.getElementById('image').value.trim(),
-        purchasePrice: document.getElementById('purchasePrice').value === '' ? '' : Number(document.getElementById('purchasePrice').value),
         price: Number(document.getElementById('price').value || 0),
         originalPrice: Number(document.getElementById('originalPrice').value || 0),
         stock: Number(document.getElementById('stock').value || 0),
@@ -3985,7 +3946,6 @@
       const nameZh = row['商品中文名'] || row['中文名'] || row['商品名'] || '';
       const nameEs = row['商品西语名'] || row['西语名'] || row['商品西班牙语名'] || nameZh;
       const stock = toNumber(row['数量'] || row['库存'], 0);
-      const purchasePrice = toNumber(row['进货价'] || row['成本价'], '');
       const categoryZh = row['大类'] || row['中文分类'] || '未分类';
       const subcategoryZh = row['子类'] || '';
       const retailRaw = row['零售价'] || row['价格'] || '';
@@ -3997,7 +3957,6 @@
         code,
         icon: importIcon(categoryZh),
         image: '',
-        purchasePrice,
         price,
         originalPrice: price,
         stock,
@@ -4083,7 +4042,6 @@
         const fullProduct = {
           ...product,
           code: productCode(product),
-          purchasePrice: productPurchasePrice(product),
           desc: productDescription(product),
           active: product.price > 0
         };
@@ -4152,7 +4110,6 @@
       const productsForExport = readProducts().map((product) => ({
         ...product,
         code: productCode(product),
-        purchasePrice: productPurchasePrice(product)
       }));
       const data = JSON.stringify({ products: productsForExport, orders: readOrders() }, null, 2);
       try {
